@@ -23,3 +23,10 @@ AlleeExtinction{R,W}(; minfounders=Param(5.0, bounds=(1.0, 200.0))) where {R,W} 
 
     return N >= f ? N : zero(N)
 end
+@inline function applyrule(data, rule::AlleeExtinction, Ns::AbstractArray, I)
+    fs = get(data, rule.minfounders, I...)
+
+    return broadcast(Ns, fs) do N, f
+        N >= f ? N : zero(N)
+    end
+end

@@ -64,6 +64,7 @@ function DG.Stencils.rebuild(n::DispersalKernel{R,N,L,<:Any,<:Any,K,F,C,D}, buff
         newstencil, kernel(n), formulation(n), cellsize(n), distancemethod(n)
     )
 end
+DG.Stencils.neighbors(hood::DispersalKernel) = neighbors(hood.stencil)
 
 cellsize(stencil::DispersalKernel) = stencil.cellsize
 distancemethod(stencil::DispersalKernel) = stencil.distancemethod

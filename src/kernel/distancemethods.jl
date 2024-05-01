@@ -33,7 +33,8 @@ Joseph D. Chipperfield et al 2011"
 """
 struct CentroidToCentroid <: DistanceMethod end
 
-dispersalprob(f, ::CentroidToCentroid, x, y, cellsize) = f(sqrt(x^2 + y^2) * cellsize)
+dispersalprob(f, ::CentroidToCentroid, x, y, cellsize::T) where T =
+    f(T(sqrt(x^2 + y^2)) * cellsize)
 
 """
     AreaToCentroid <: DistanceMethod
@@ -52,15 +53,15 @@ Base.@kwdef struct AreaToCentroid{SS<:Number} <: DistanceMethod
     subsampling::SS = Param(10.0; bounds=(2.0, 40.0))
 end
 
-@inline function dispersalprob(f, dm::AreaToCentroid, x, y, cellsize)
-    prob = zero(cellsize)
-    centerfirst = 1 / subsampling(dm) / 2 - 0.5
+@inline function dispersalprob(f, dm::AreaToCentroid, x, y, cellsize::T) where T
+    prob = zero(T)
+    centerfirst = 1 / subsampling(dm) / 2 - oneunit(T) / 2
     centerlast = centerfirst * -1
     range = LinRange(centerfirst, centerlast, round(Int, subsampling(dm)))
     for j in range, i in range
         prob += sqrt((x + i)^2 + (y + j)^2) * cellsize |> f
     end
-    prob / subsampling(dm)^2
+    return T(prob / subsampling(dm)^2)
 end
 
 """
@@ -79,16 +80,16 @@ Base.@kwdef struct AreaToArea{SS<:Number} <: DistanceMethod
     subsampling::SS = Param(10.0; bounds=(2.0, 40.0))
 end
 
-@inline function dispersalprob(f, dm::AreaToArea, x, y, cellsize)
-    prob = zero(cellsize)
+@inline function dispersalprob(f, dm::AreaToArea, x, y, cellsize::T) where T
+    prob = zero(T)
     # Get the center point of the first cell (for both dimensions)
-    centerfirst = 1 / subsampling(dm) / 2 - 0.5
+    centerfirst = 1 / subsampling(dm) / 2 - oneunit(T) / 2
     centerlast = centerfirst * -1
     range = LinRange(centerfirst, centerlast, round(Int, subsampling(dm)))
     for i in range, j in range
         for a in range, b in range
-            prob += sqrt((x + i + a)^2 + (y + j + b)^2) * cellsize |> f
+            prob += T(sqrt((x + i + a)^2 + (y + j + b)^2) * cellsize) |> f
         end
     end
-    prob / subsampling(dm)^4
+    return T(prob / subsampling(dm)^4)
 end

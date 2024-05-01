@@ -53,7 +53,7 @@ modifyrule(rule::ExponentialGrowth, data) = precalc_nsteps(rule, data)
     N > zero(N) || return zero(N)
     rt = get(data, rule.rate, I...) * rule.nsteps
 
-    return @fastmath N * exp(rt)
+    return N * exp(rt)
 end
 
 """
@@ -106,12 +106,32 @@ modifyrule(rule::LogisticGrowth, data) = precalc_nsteps(rule, data)
     rt = get(data, rule.rate, I...) * rule.nsteps
     k = get(data, rule.carrycap, I...)
 
-    if rt > zero(rt)
-        return @fastmath (N * k) / (N + (k - N) * exp(-rt))
+    new_N = if rt > zero(rt)
+        (N * k) / (N + (k - N) * exp(-rt))
     else
-        return @fastmath N * exp(rt)
+        N * exp(rt)
     end
+    isnan(new_NS) && _nan_pop_error(new_N, Ns, k)
+    return min(max(zero(new_N), new_N), k)
 end
+@inline function applyrule(data, rule::LogisticGrowth, Ns::AbstractArray, I)
+    rts = get(data, rule.rate, I...) .* rule.nsteps
+    ks = get(data, rule.carrycap, I...)
+
+    new_Ns = map(Ns, rts, ks) do N, rt, k
+        if rt > zero(rt)
+            (N * k) / (N + (k - N) * exp(-rt))
+        else
+            N * exp(rt)
+        end
+    end
+    any(isnan, new_Ns) && return zero(Ns)#_nan_pop_error(new_Ns, Ns, ks)
+    any(isinf, new_Ns) && return ks #_inf_pop_error(new_Ns, Ns, ks)
+    return min.(max.(zero(eltype(new_Ns)), new_Ns), ks)
+end
+
+@noinline _nan_pop_error(new_N, N, k) = error("NaN population found: $new_N, from original $N and carrycap $k")
+@noinline _inf_pop_error(new_N, N, k) = error("Inf population found: $new_N, from original $N and carrycap $k")
 
 """
     ThresholdGrowth <: CellRule
