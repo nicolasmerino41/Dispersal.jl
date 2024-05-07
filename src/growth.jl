@@ -111,7 +111,6 @@ modifyrule(rule::LogisticGrowth, data) = precalc_nsteps(rule, data)
     else
         N * exp(rt)
     end
-    isnan(new_NS) && _nan_pop_error(new_N, Ns, k)
     return min(max(zero(new_N), new_N), k)
 end
 @inline function applyrule(data, rule::LogisticGrowth, Ns::AbstractArray, I)
@@ -125,13 +124,8 @@ end
             N * exp(rt)
         end
     end
-    any(isnan, new_Ns) && return zero(Ns)#_nan_pop_error(new_Ns, Ns, ks)
-    any(isinf, new_Ns) && return ks #_inf_pop_error(new_Ns, Ns, ks)
     return min.(max.(zero(eltype(new_Ns)), new_Ns), ks)
 end
-
-@noinline _nan_pop_error(new_N, N, k) = error("NaN population found: $new_N, from original $N and carrycap $k")
-@noinline _inf_pop_error(new_N, N, k) = error("Inf population found: $new_N, from original $N and carrycap $k")
 
 """
     ThresholdGrowth <: CellRule
