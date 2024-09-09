@@ -107,11 +107,11 @@ modifyrule(rule::LogisticGrowth, data) = precalc_nsteps(rule, data)
     k = get(data, rule.carrycap, I...)
 
     new_N = if rt > zero(rt)
-        (N * k) / (N + (k - N) * exp(-rt))
+        (N .* k) ./ (N .+ (k .- N) .* exp.(-rt))
     else
-        N * exp(rt)
+        N .* exp.(rt)
     end
-    return min(max(zero(new_N), new_N), k)
+    return min.(max.(zero(new_N), new_N), k)
 end
 @inline function applyrule(data, rule::LogisticGrowth, Ns::AbstractArray, I)
     rts = get(data, rule.rate, I...) .* rule.nsteps
