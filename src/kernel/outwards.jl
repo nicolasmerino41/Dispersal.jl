@@ -94,14 +94,6 @@ function OutwardsDispersalRemix{R,W}(; maskbehavior::Union{CheckMaskEdges, Ignor
 end
 
 @inline function applyrule!(data, rule::OutwardsDispersalRemix{R,W}, N, I) where {R,W}
-    # Check if body_mass_vector is defined
-    if !isdefined(Main, :body_mass_vector)
-        error("Error: `body_mass_vector` is not defined in the environment. Please define it before running the simulation.")
-    end
-    
-    # Retrieve the body_mass_vector from the environment
-    body_mass_vector = Main.body_mass_vector
-
     N == zero(N) && return nothing
 
     # Check if the current cell is masked, skip if it is
@@ -115,7 +107,9 @@ end
         target = I .+ offset
         (target_mod, inbounds) = DynamicGrids.inbounds(data, target)
         if inbounds && (isnothing(mask_data) || mask_data[target_mod...])
-            @inbounds propagules = N * k * body_mass_vector  
+            @inbounds propagules = N * k * body_mass_vector
+            println("N is of type", typeof(N), " and of value ", N)
+            println("k is of type", typeof(k), " and of value ", k)  
             @inbounds add!(data[W], propagules, target_mod...)  
             sum += propagules
         end
