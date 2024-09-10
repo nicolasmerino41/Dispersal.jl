@@ -116,10 +116,7 @@ end
         (target_mod, inbounds) = DynamicGrids.inbounds(data, target)
 
         if inbounds && (isnothing(mask_data) || mask_data[target_mod...])
-            # Adjust kernel by the body_mass_vector
-            adjusted_kernel = k .* body_mass_vector
-
-            @inbounds propagules = N .* adjusted_kernel  # Apply the adjusted kernel
+            @inbounds propagules = k .* body_mass_vector * N   # Apply the adjusted kernel
             @inbounds add!(data[W], propagules, target_mod...)  # Add to neighboring cell
             sum += propagules
         end
