@@ -107,7 +107,7 @@ end
         target = I .+ offset
         (target_mod, inbounds) = DynamicGrids.inbounds(data, target)
         if inbounds && (isnothing(mask_data) || mask_data[target_mod...])
-            @inbounds propagules = N * k * body_mass_vector
+            @inbounds propagules = N * k * Main.body_mass_vector
             println("N is of type", typeof(N), " and of value ", N)
             println("k is of type", typeof(k), " and of value ", k)  
             @inbounds add!(data[W], propagules, target_mod...)  
