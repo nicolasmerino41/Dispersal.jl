@@ -114,16 +114,12 @@ end
     for (offset, k) in zip(offsets(rule), kernel(rule))
         target = I .+ offset
         (target_mod, inbounds) = DynamicGrids.inbounds(data, target)
-
         if inbounds && (isnothing(mask_data) || mask_data[target_mod...])
-            @inbounds propagules = k .* body_mass_vector .* N.a   # Apply the adjusted kernel
-            @inbounds add!(data[W], propagules, target_mod...)  # Add to neighboring cell
-            sum += MyStructs256(SVector{256, Float64}(propagules))
+            @inbounds propagules = N * k * body_mass_vector  
+            @inbounds add!(data[W], propagules, target_mod...)  
+            sum += propagules
         end
     end
-    
-    # Subtract the sum of dispersal from the current cell
     @inbounds sub!(data[W], sum, I...)
-    
     return nothing
 end
