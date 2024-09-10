@@ -28,7 +28,7 @@ export DistanceMethod, CentroidToCentroid, AreaToArea, AreaToCentroid #, Centroi
 
 export DispersalKernel
 
-export InwardsDispersal, OutwardsDispersal
+export InwardsDispersal, OutwardsDispersal, OutwardsDispersalRemix
 
 export AlleeExtinction, JumpDispersal
 
