@@ -107,7 +107,7 @@ end
         target = I .+ offset
         (target_mod, inbounds) = DynamicGrids.inbounds(data, target)
         if inbounds && (isnothing(mask_data) || mask_data[target_mod...])
-            @inbounds propagules = N * k * Main.body_mass_vector
+            @inbounds propagules = N * k * Main.scaling_vector
             @inbounds add!(data[W], propagules, target_mod...)  
             sum += propagules
         end
